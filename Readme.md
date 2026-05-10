@@ -38,47 +38,85 @@
 finrisk-mlops-pipeline/ 
 
 │ ├── app/ # FastAPI application 
+
 │ ├── main.py # API routes 
+
 │ ├── schema.py # Pydantic models 
+
 │ └── model_loader.py # Model loading from MLflow 
 
+
 │ ├── training/ # Training pipeline 
+
 │ ├── train.py # XGBoost training with MLflow 
+
 │ ├── evaluate.py # Financial metrics (Gini, KS, IV) 
+
 │ └── register.py # Model promotion logic 
 
+
 │ ├── monitoring/ # Monitoring & drift detection 
+
 │ ├── drift_report.py # Evidently AI reports 
+
 │ ├── alerts.py # Alert system (PSI, degradation) 
+
 │ └── prometheus.yml # Prometheus config 
 
+
 │ ├── pipeline/ # Orchestration 
+
 │ └── retrain_dag.py # Airflow DAG 
 
+
 │ ├── infrastructure/ # Deployment configs 
+
 │ ├── Dockerfile # Production image 
+
 │ ├── docker-compose.yml # Local dev stack 
+
 │ └── cloudbuild.yaml # GCP Cloud Build 
 
+
+
 │ ├── tests/ # Test suite 
+
 │ ├── test_api.py # API endpoint tests 
+
 │ ├── test_model.py # Model performance tests 
+
 │ └── test_schema.py # Pydantic validation tests 
+
+
 
 │ ├── .github/ 
 
+
+
 │ └── workflows/ 
+
 │ └── ci_cd.yml # GitHub Actions CI/CD 
 
+
+
 │ ├── data/ 
+
 │ └── loan_data.csv # Your existing P5 dataset 
 
+
+
 │ ├── models/ # Model artifacts (gitignored) 
+
 │ ├── xgboost_model.joblib 
+
 │ └── preprocessor.joblib 
+
 │ ├── requirements.txt 
 
+
+
 ├── .env.example 
+
 └── README.md
 
 
