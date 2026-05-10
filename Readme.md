@@ -1,4 +1,58 @@
-┌──────────────────────────────────────────────��──────────────────────┐ │ Data Ingestion Layer │ │ loan_data.csv → PostgreSQL (Feature Store) → Data Quality Checks │ └────────────────────────────┬────────────────────────────────────────┘ │ ┌────────────────────────────▼────────────────────────────────────────┐ │ Training & Validation │ │ ┌──────────────────┐ ┌────────────────────┐ ┌─────────────────┐ │ │ │ XGBoost Training │→ │ MLflow Experiment │→ │ Model Registry │ │ │ │ (Gini, KS, IV) │ │ (All Metrics) │ │ (Production) │ │ │ └──────────────────┘ └────────────────────┘ └─────────────────┘ │ └────────────────────────────┬────────────────────────────────────────┘ │ ┌────────────────────────────▼────────────────��───────────────────────┐ │ Deployment & Serving │ │ ┌────────────────────────────────────────────────────────────────┐ │ │ │ FastAPI Service (Docker Container) │ │ │ │ ├─ /predict → Single Prediction │ │ │ │ ├─ /batch-predict → Batch Inference (10K records) │ │ │ │ ├─ /health → Service Health │ │ │ │ └─ /metrics → Prometheus Metrics │ │ │ └────────────────────────────────────────────────────────────────┘ │ │ ┌────────────────────────────────────────────────────────────────┐ │ │ │ Cloud Deployment: GCP Cloud Run │ │ │ │ ├─ Auto-scaling (0-100 instances) │ │ │ │ ├─ Load Balancing │ │ │ │ └─ SSL/TLS + API Keys │ │ │ └────────────────────────────────────────────────────────────────┘ │ └────────────────────────────┬────────────────────────────────────────┘ │ ┌────────────────────────────▼────────────────────────────────────────┐ │ Monitoring & Drift Detection │ │ ┌─────────────────────────────────────────────────────────────┐ │ │ │ Evidently AI Reports: │ │ │ │ ├─ Data Drift → PSI (Population Stability Index) │ │ │ │ ├─ Prediction Drift → Target Distribution Shift │ │ │ │ ├─ Data Quality → Missing Values, Duplicates │ │ │ │ └─ Model Performance → Gini, KS Degradation │ │ │ └─────────────────────────────────────────────────────────────┘ │ │ ┌─────────────────────────────────────────────────────────────┐ │ │ │ Prometheus + Grafana: │ │ │ │ ├─ Predictions per minute │ │ │ │ ├─ Latency (p50, p95, p99) │ │ │ │ ├─ Error rates │ │ │ │ └─ Model version in production │ │ │ └─────────────────────────────────────────────────────────────┘ │ └────────────────────────────┬────────────────────────────────────────┘ │ ┌────────────────────────────▼────────────────────────────────────────┐ │ Orchestration & Automated Retraining │ │ ┌────────────────────────────────────────────────────────────────┐ │ │ │ Apache Airflow DAG (Weekly Schedule) │ │ │ │ ├─ Extract new data from production logs │ │ │ │ ├─ Run drift detection (Evidently) │ │ │ │ ├─ IF drift detected OR degradation → Retrain │ │ │ │ ├─ Validate new model (Gini > 0.40) │ │ │ │ ├─ Promote to Production if valid │ │ │ │ └─ Rollback if validation fails │ │ │ └────────────────────────────────────────────────────────────────┘ │ └─────────────────────────────────────────────────────────────────────┘
+┌──────────────────────────────────────────────��──────────────────────┐ 
+│ Data Ingestion Layer 
+││ loan_data.csv → PostgreSQL (Feature Store) → Data Quality Checks 
+│└────────────────────────────┬────────────────────────────────────────┘ 
+│ ┌────────────────────────────▼────────────────────────────────────────┐ 
+│ Training & Validation │ 
+│ ┌──────────────────┐ ┌────────────────────┐ ┌─────────────────┐ 
+│ │ │ XGBoost Training │→ │ MLflow Experiment │→ │ Model Registry 
+│ │ │ │ (Gini, KS, IV) │ │ (All Metrics) │ │ (Production) 
+│ │ │ └──────────────────┘ └────────────────────┘ └─────────────────┘ │ └────────────────────────────┬────────────────────────────────────────┘ 
+│ ┌────────────────────────────▼────────────────��───────────────────────┐ 
+│ Deployment & Serving │ 
+│ ┌────────────────────────────────────────────────────────────────┐ 
+│ │ │ FastAPI Service (Docker Container) 
+│ │ │ │ ├─ /predict → Single Prediction 
+│ │ │ │ ├─ /batch-predict → Batch Inference (10K records) 
+│ │ │ │ ├─ /health → Service Health 
+│ │ │ │ └─ /metrics → Prometheus Metrics 
+│ │ │ └────────────────────────────────────────────────────────────────┘
+│ │ ┌────────────────────────────────────────────────────────────────┐ 
+│ │ │ Cloud Deployment: GCP Cloud Run 
+│ │ │ │ ├─ Auto-scaling (0-100 instances) 
+│ │ │ │ ├─ Load Balancing 
+│ │ │ │ └─ SSL/TLS + API Keys 
+│ │ │ └────────────────────────────────────────────────────────────────┘ 
+│ └────────────────────────────┬────────────────────────────────────────┘ 
+│ ┌────────────────────────────▼────────────────────────────────────────┐ 
+│ Monitoring & Drift Detection │ 
+│ ┌─────────────────────────────────────────────────────────────┐ 
+│ │ │ Evidently AI Reports: 
+│ │ │ │ ├─ Data Drift → PSI (Population Stability Index) 
+│ │ │ │ ├─ Prediction Drift → Target Distribution Shift 
+│ │ │ │ ├─ Data Quality → Missing Values, Duplicates 
+│ │ │ │ └─ Model Performance → Gini, KS Degradation 
+│ │ │ └─────────────────────────────────────────────────────────────┘ 
+│ │ ┌─────────────────────────────────────────────────────────────┐ 
+│ │ │ Prometheus + Grafana: 
+│ │ │ │ ├─ Predictions per minute 
+│ │ │ │ ├─ Latency (p50, p95, p99) 
+│ │ │ │ ├─ Error rates 
+│ │ │ │ └─ Model version in production 
+│ │ │ └─────────────────────────────────────────────────────────────┘ 
+│ └────────────────────────────┬────────────────────────────────────────┘ 
+│ ┌────────────────────────────▼────────────────────────────────────────┐ 
+│ Orchestration & Automated Retraining 
+│ │ ┌────────────────────────────────────────────────────────────────┐ 
+│ │ │ Apache Airflow DAG (Weekly Schedule) 
+│ │ │ │ ├─ Extract new data from production logs 
+│ │ │ │ ├─ Run drift detection (Evidently) 
+│ │ │ │ ├─ IF drift detected OR degradation → Retrain 
+│ │ │ │ ├─ Validate new model (Gini > 0.40) 
+│ │ │ │ ├─ Promote to Production if valid 
+│ │ │ │ └─ Rollback if validation fails 
+│ │ │ └────────────────────────────────────────────────────────────────┘ 
+│ └─────────────────────────────────────────────────────────────────────┘
 
 ## Key Features
 
